@@ -1,10 +1,13 @@
-import { useState, useRef, useEffect } from "react";
-import { Todo } from "../features/todos/todo.state";
-import { useTodos } from "../hooks/useTodo";
-import { Circle, CheckCircle2 } from "lucide-react";
+import { useState, useRef, useEffect } from 'react';
+import { Clock, Trash2 } from 'lucide-react';
+import { TodoItemDisplay } from './TodoItemDisplay';
+import { TodoItemActions } from './TodoItemActions';
+import { Todo } from '../features/todos/todo.state';
+import { useTodos } from '../hooks/useTodo';
+import { formatShortTimeAgo } from '../lib/formatTimeAgo';
 
 export function TodoItem({ todo }: { todo: Todo }) {
-  const { toggleTodo, editTodo } = useTodos();
+  const { toggleTodo, editTodo, deleteTodo } = useTodos();
   const [isEditing, setIsEditing] = useState(false);
   const [editedText, setEditedText] = useState(todo.text);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -15,63 +18,61 @@ export function TodoItem({ todo }: { todo: Todo }) {
     }
   }, [isEditing]);
 
-  const handleClick = () => {
-    setIsEditing(true);
-    setEditedText(todo.text);
-  };
-
-  const handleBlur = () => {
-    saveChanges();
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      saveChanges();
-    } else if (e.key === "Escape") {
-      setIsEditing(false);
-      setEditedText(todo.text);
-    }
-  };
+  const formattedDate = todo.createdAt
+    ? formatShortTimeAgo(new Date(todo.createdAt))
+    : 'just now';
 
   const saveChanges = () => {
-    if (editedText.trim() !== "" && editedText !== todo.text) {
+    if (editedText.trim() && editedText !== todo.text) {
       editTodo(todo.id, editedText.trim());
-    } else if (editedText.trim() === "") {
+    } else if (!editedText.trim()) {
       setEditedText(todo.text);
     }
     setIsEditing(false);
   };
 
   return (
-    <li className="flex items-center gap-3 py-1 border-b border-gray-100">
-      <button
-        onClick={() => toggleTodo(todo.id)}
-        className="text-gray-400 hover:text-gray-600 focus:outline-none"
-      >
-        {todo.completed ? (
-          <CheckCircle2 className="h-6 w-6 text-purple-700" />
-        ) : (
-          <Circle className="h-6 w-6 text-purple-700" />
-        )}
-      </button>
-      {isEditing ? (
-        <input
-          ref={inputRef}
-          type="text"
-          value={editedText}
-          onChange={(e) => setEditedText(e.target.value)}
-          onBlur={handleBlur}
-          onKeyDown={handleKeyDown}
-          className="flex-1 rounded text-lg  text-gray-800 outline-none"
+    <li className="bg-white rounded-xl border border-gray-100 overflow-hidden transition-all group">
+      <div className="p-4 flex items-center gap-3">
+        <TodoItemActions
+          todo={todo}
+          toggleTodo={toggleTodo}
+          deleteTodo={deleteTodo}
         />
-      ) : (
-        <span
-          onClick={handleClick}
-          className={`cursor-pointer font-semibold text-lg text-gray-800 ${todo.completed ? 'opacity-70 line-through' : ''}`}
-        >
-          {todo.text}
-        </span>
-      )}
+
+        <TodoItemDisplay
+          todo={todo}
+          isEditing={isEditing}
+          editedText={editedText}
+          inputRef={inputRef}
+          onTextClick={() => {
+            setIsEditing(true);
+            setEditedText(todo.text);
+          }}
+          onBlur={saveChanges}
+          onChange={(e) => setEditedText(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') saveChanges();
+            else if (e.key === 'Escape') {
+              setIsEditing(false);
+              setEditedText(todo.text);
+            }
+          }}
+        />
+
+        <div className="ml-auto text-xs text-gray-400 flex items-center group-hover:-translate-x-1 transition-transform duration-500">
+          <Clock className="h-3 w-3 mr-1" />
+          <span>{formattedDate}</span>
+        </div>
+        <div className="lg:hidden group-hover:flex items-center transition-opacity duration-300">
+          <button
+            onClick={() => deleteTodo(todo.id)}
+            className="text-gray-400 hover:text-red-500 p-1 rounded-lg transition-transform duration-200 hover:scale-110 active:scale-95"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
     </li>
   );
 }

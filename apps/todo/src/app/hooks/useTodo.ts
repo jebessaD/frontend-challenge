@@ -1,4 +1,4 @@
-// apps/todo/src/app/features/todos/useTodos.ts
+
 import { useRecoilState } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
 import { todosState } from '../features/todos/todo.state';
@@ -7,7 +7,7 @@ export const useTodos = () => {
   const [todos, setTodos] = useRecoilState(todosState);
 
   const addTodo = (text: string) => {
-    setTodos([...todos, { id: uuidv4(), text, completed: false }]);
+    setTodos([...todos, { id: uuidv4(), text, completed: false, createdAt: new Date().toISOString() }]);
   };
 
   const toggleTodo = (id: string) => {
@@ -26,5 +26,9 @@ export const useTodos = () => {
     );
   };
 
-  return { todos, addTodo, toggleTodo, editTodo };
+  const deleteTodo = (id: string) => {
+    setTodos(todos.filter((todo) => todo.id !== id));
+  };
+
+  return { todos, addTodo, toggleTodo, editTodo, deleteTodo };
 };

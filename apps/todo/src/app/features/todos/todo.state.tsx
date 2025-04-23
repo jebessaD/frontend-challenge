@@ -4,9 +4,9 @@ export interface Todo {
   id: string;
   text: string;
   completed: boolean;
+  createdAt: string;
 }
 
-// 👇 Put the effect function here
 function localStorageEffect<T>(key: string) {
   return ({ setSelf, onSet }: any) => {
     const savedValue = localStorage.getItem(key);
@@ -24,13 +24,8 @@ function localStorageEffect<T>(key: string) {
   };
 }
 
-// 👇 Recoil atom with the effect
 export const todosState = atom<Todo[]>({
   key: 'todosState',
-  default: [
-    { id: '1', text: 'Milk', completed: false },
-    { id: '2', text: 'Eggs', completed: false },
-    { id: '3', text: 'Cheese', completed: false }
-  ],
+  default: [],
   effects: [localStorageEffect<Todo[]>('todosState')],
 });
