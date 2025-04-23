@@ -7,7 +7,7 @@ import {
   export function formatShortTimeAgo(date: Date): string {
     const now = new Date();
     const mins = differenceInMinutes(now, date);
-    if (mins < 1) return 'just now';
+    if (mins < 1) return 'Just now';
     if (mins < 60) return `${mins}m ago`;
   
     const hrs = differenceInHours(now, date);

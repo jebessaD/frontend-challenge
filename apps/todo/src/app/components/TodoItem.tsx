@@ -20,7 +20,7 @@ export function TodoItem({ todo }: { todo: Todo }) {
 
   const formattedDate = todo.createdAt
     ? formatShortTimeAgo(new Date(todo.createdAt))
-    : 'just now';
+    : 'Just now';
 
   const saveChanges = () => {
     if (editedText.trim() && editedText !== todo.text) {
